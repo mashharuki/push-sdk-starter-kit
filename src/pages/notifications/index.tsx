@@ -1,11 +1,11 @@
-import { useEffect, useState, useContext, useCallback } from 'react';
-import styled from 'styled-components';
-import { Section, SectionItem, SectionButton } from '../../components/styled';
-import Loader from '../../components/loader'
-import { DarkIcon, LightIcon } from '../../components/icons';
-import { Web3Context, EnvContext } from '../../context';
 import * as PushAPI from '@pushprotocol/restapi';
-import { NotificationItem, chainNameType, SubscribedModal } from '@pushprotocol/uiweb';
+import { NotificationItem, SubscribedModal, chainNameType } from '@pushprotocol/uiweb';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { DarkIcon, LightIcon } from '../../components/icons';
+import Loader from '../../components/loader';
+import { Section, SectionButton, SectionItem } from '../../components/styled';
+import { EnvContext, Web3Context } from '../../context';
 import { getCAIPAddress } from '../../helpers';
 
 const NotificationListContainer = styled.div`
@@ -39,7 +39,7 @@ const ThemeSelector = styled.div`
 `;
 
 const NotificationsTest = () => {
-  const { account, chainId } = useContext<any>(Web3Context);
+  const { account, chainId, library } = useContext<any>(Web3Context);
   const { env, isCAIP } = useContext<any>(EnvContext);
   const [isLoading, setLoading] = useState(false);
   const [notifs, setNotifs] = useState<PushAPI.ParsedResponseType[]>();
@@ -48,7 +48,9 @@ const NotificationsTest = () => {
   const [viewType, setViewType] = useState('notif');
   const [showSubscribe, setShowSubscribe] = useState(false);
 
-
+  /**
+   * 通知を読み込むところ。
+   */
   const loadNotifications = useCallback(async () => {
     try {
       setLoading(true);
@@ -70,6 +72,9 @@ const NotificationsTest = () => {
     }
   }, [account, env, isCAIP]);
 
+  /**
+   * スパムを読み込む
+   */
   const loadSpam = useCallback(async () => {
     try {
       setLoading(true);
@@ -92,6 +97,35 @@ const NotificationsTest = () => {
     setTheme(lastTheme => {
       return lastTheme === 'dark' ? 'light' : 'dark'
     })
+  };
+
+  /***
+   * 通知を送信するメソッド(サンプル)
+   */
+  const sendNotification = async() => {
+    // signer obを読み込む
+    const _signer = library.getSigner(account);
+    // 通知を送る。
+    const apiResponse = await PushAPI.payloads.sendNotification({
+      signer: _signer,
+      type: 3, // target
+      identityType: 2, // direct payload
+      notification: {
+        title: `[SDK-TEST] notification TITLE:`,
+        body: `[sdk-test] notification BODY`
+      },
+      payload: {
+        title: `[sdk-test] payload title`,
+        body: `sample msg body`,
+        cta: '',
+        img: ''
+      },
+      recipients: 'eip155:5:0x1431ea8af860C3862A919968C71f901aEdE1910E', // recipient address
+      channel: 'eip155:5:0x51908F598A5e0d8F1A3bAbFa6DF76F9704daD072', // your channel address
+      env: 'staging'
+    });
+
+    console.log("send noti:", apiResponse);
   };
 
   const toggleSubscribedModal = () => {
@@ -125,6 +159,7 @@ const NotificationsTest = () => {
           <SectionButton onClick={() => { setViewType('notif') }}>Notifications</SectionButton>
           <SectionButton onClick={() => { setViewType('spam') }}>Spam</SectionButton>
           <SectionButton onClick={toggleSubscribedModal}>show subscribed modal</SectionButton>
+          <SectionButton onClick={sendNotification}>Send Sample Notifications</SectionButton>
         </TabButtons>
 
         <Loader show={isLoading} />
