@@ -1,7 +1,7 @@
+import { useWeb3React } from "@web3-react/core"
+import { InjectedConnector } from '@web3-react/injected-connector'
 import { useEffect } from "react"
 import styled from "styled-components"
-import { InjectedConnector } from '@web3-react/injected-connector'
-import { useWeb3React } from "@web3-react/core"
 
 interface NwMappingType {
   [key: number]: string
@@ -12,11 +12,13 @@ const NETWORK_MAPPING : NwMappingType = {
   42: 'ETH_KOVAN',
   3: 'ETH_ROPSTEN',
   37: 'POLYGON_MAINNET',
-  80001: 'POLYGON_MUMBAI'
+  80001: 'POLYGON_MUMBAI',
+  314159: 'FILECOIN TESTNET',
+  11155111: 'ETHEREUM_SEPOLIA'
 };
 
 const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 42, 37, 80001],
+  supportedChainIds: [1, 3, 4, 5, 42, 37, 80001, 314159, 11155111],
 })
 
 const ConnectWrapper = styled.div`
