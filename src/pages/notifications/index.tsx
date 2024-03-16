@@ -1,5 +1,6 @@
 import * as PushAPI from '@pushprotocol/restapi';
 import { NotificationItem, SubscribedModal, chainNameType } from '@pushprotocol/uiweb';
+import { ethers } from 'ethers';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { DarkIcon, LightIcon } from '../../components/icons';
@@ -105,23 +106,29 @@ const NotificationsTest = () => {
   const sendNotification = async() => {
     // signer obを読み込む
     const _signer = library.getSigner(account);
+    // senderを別のアカウントにする(接続先のRPCエンドポイントも別にしてみる。)
+    const provider = new ethers.providers.JsonRpcProvider(process.env.REACT_APP_SEPOLIA_URL!);
+    const signer = new ethers.Wallet(process.env.REACT_APP_PRIVATE_KEY!);
+    // connect
+    signer.connect(provider);
+    
     // 通知を送る。
     const apiResponse = await PushAPI.payloads.sendNotification({
-      signer: _signer,
+      signer: signer,
       type: 3, // target
       identityType: 2, // direct payload
       notification: {
         title: `[SDK-TEST] notification TITLE:`,
-        body: `[sdk-test] notification BODY`
+        body: `[sdk-test] notification BODY!!!!`
       },
       payload: {
         title: `[sdk-test] payload title`,
-        body: `sample msg body`,
+        body: `sample msg body!!!!!!`,
         cta: '',
         img: ''
       },
-      recipients: 'eip155:5:0x1431ea8af860C3862A919968C71f901aEdE1910E', // recipient address
-      channel: 'eip155:5:0x51908F598A5e0d8F1A3bAbFa6DF76F9704daD072', // your channel address
+      recipients: 'eip155:11155111:0x51908F598A5e0d8F1A3bAbFa6DF76F9704daD072', // recipient address
+      channel: 'eip155:11155111:0x51908F598A5e0d8F1A3bAbFa6DF76F9704daD072', // your channel address
       env: 'staging'
     });
 
